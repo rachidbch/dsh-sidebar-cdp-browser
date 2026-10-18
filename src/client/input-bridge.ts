@@ -65,9 +65,15 @@ export function attachInputBridge(options: InputBridgeOptions): () => void {
   canvas.addEventListener('pointerup', release)
   canvas.addEventListener('pointercancel', cancel)
   canvas.addEventListener('wheel', wheel, { passive: false })
-  // Some hosts scroll the pane instead of the canvas; capture so the wheel
-  // reaches the page even when an overlay sits above the canvas.
-  window.addEventListener('wheel', wheel, { passive: false, capture: true })
+  // Capture-phase listener so an overlay above the canvas cannot swallow the
+  // gesture, scoped to the canvas rectangle: acting on every wheel in the page
+  // stole two-finger scroll from the rest of DSH.
+  const overCanvas = (event: WheelEvent): boolean => {
+    const rect = canvas.getBoundingClientRect()
+    return event.clientX >= rect.left && event.clientX <= rect.right && event.clientY >= rect.top && event.clientY <= rect.bottom
+  }
+  const wheelScoped = (event: WheelEvent): void => { if (overCanvas(event)) wheel(event) }
+  window.addEventListener('wheel', wheelScoped, { passive: false, capture: true })
   canvas.addEventListener('contextmenu', context)
   return () => {
     if (moveFrame !== undefined) window.cancelAnimationFrame(moveFrame)
@@ -76,7 +82,7 @@ export function attachInputBridge(options: InputBridgeOptions): () => void {
     canvas.removeEventListener('pointerup', release)
     canvas.removeEventListener('pointercancel', cancel)
     canvas.removeEventListener('wheel', wheel)
-    window.removeEventListener('wheel', wheel, { capture: true } as EventListenerOptions)
+    window.removeEventListener('wheel', wheelScoped, { capture: true } as EventListenerOptions)
     canvas.removeEventListener('contextmenu', context)
   }
 }

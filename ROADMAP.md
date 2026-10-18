@@ -28,3 +28,11 @@ Two candidate shapes:
 - Disable the pane's own scrolling for the live canvas so the gesture has nowhere else to go, and forward `wheel` only.
 
 Needs a client change plus a real trackpad to verify; a headless test cannot produce a trackpad gesture.
+
+## Stealth test (human-owned): Gmail then Discord
+
+A limit test, not a feature. Create a Gmail account, then use it to create a Discord account, entirely through the shared browser.
+
+Why it is a real test: Google login accepted the CDP-driven Chrome, which was not expected. Discord is a different class of defence (behavioural + fingerprint + phone/IP reputation), so it separates "passed a login" from "passed a bot check".
+
+Nothing here should be optimised for in the CDP stack (see ADR-003). If it fails, the finding is the deliverable: which gate refused, at which step, with what signal. Camoufox is the fallback path for anything that proves CDP-hostile.
