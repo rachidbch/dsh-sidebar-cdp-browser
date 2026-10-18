@@ -1,0 +1,458 @@
+.root {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  color: var(--dsw-alias-label-primary);
+  background: var(--dsw-alias-bg-layer-1);
+  font-family: var(--dsw-font-family, system-ui, sans-serif);
+}
+
+.topRow {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0 8px;
+  border-bottom: 1px solid var(--dsw-alias-border-l2);
+}
+
+.endpointChip,
+.connectionToolbar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  font-size: 12px;
+}
+
+.endpointChip {
+  color: var(--dsw-alias-label-tertiary);
+  font-family: var(--dsw-font-mono, ui-monospace, monospace);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Settings panel ── the better-sidebar secondary-settings popup recipe
+   (SideCardSection .popupRow / .typedInputNumber / .switch): each setting a
+   hairline card (l2 border, 12px radius, layer-3 fill), title 14/22 primary
+   + desc 12/18 tertiary left, the control right; compact 76px numeric
+   inputs; the popup-standard 36×20 switch. */
+
+.settingsPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 320px;
+}
+
+.settingRow {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  min-width: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 12px;
+  background: var(--dsw-alias-bg-layer-3);
+  transition: border-color 0.16s, background 0.16s;
+}
+
+.settingRow:hover { border-color: var(--dsw-alias-label-dimmed); }
+
+/* Long free-form values (the endpoint URL) stack: text on top, full-width
+   input below — the same stacked variant dsh-sidebar-vscode uses. */
+.settingRowStack {
+  flex-direction: column;
+  align-items: stretch;
+  justify-content: flex-start;
+  gap: 8px;
+}
+
+.settingText { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.settingTitle { font-size: 14px; line-height: 22px; color: var(--dsw-alias-label-primary); }
+.settingDesc { font-size: 12px; line-height: 18px; color: var(--dsw-alias-label-tertiary); }
+.settingHint { margin: 0; font-size: 12px; line-height: 18px; color: var(--dsw-alias-label-tertiary); }
+
+.settingControl { flex: none; display: flex; align-items: center; gap: 6px; }
+.settingTimes { font-size: 12px; line-height: 18px; color: var(--dsw-alias-label-tertiary); }
+
+.settingInput,
+.settingNumber {
+  box-sizing: border-box;
+  padding: 5px 8px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 8px;
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  font-size: 13px;
+  line-height: 18px;
+}
+
+.settingInput {
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
+  font-family: var(--dsw-font-mono, ui-monospace, monospace);
+}
+
+.settingNumber { width: 76px; }
+
+.settingInput:focus-visible,
+.settingNumber:focus-visible {
+  outline: 2px solid var(--dsw-alias-state-business-primary);
+  outline-offset: 2px;
+}
+
+.settingNumber[data-invalid='true'] { border-color: var(--dsw-alias-state-error-primary); }
+.settingNumber[data-invalid='true']:focus-visible { outline-color: var(--dsw-alias-state-error-primary); }
+
+/* The popup-standard switch: a visually hidden checkbox (native semantics
+   and focus) driving a styled 36×20 track with a sliding thumb. */
+.settingSwitch { position: relative; display: inline-flex; flex: none; cursor: pointer; }
+.switchInput { position: absolute; width: 1px; height: 1px; margin: 0; opacity: 0; }
+.switchTrack {
+  display: inline-flex;
+  align-items: center;
+  width: 36px;
+  height: 20px;
+  padding: 2px;
+  box-sizing: border-box;
+  border-radius: 10px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-layer-2);
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+.switchThumb {
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--dsw-alias-label-tertiary);
+  transition: transform 0.15s ease, background 0.15s ease;
+}
+.settingSwitch:hover .switchTrack { border-color: var(--dsw-alias-label-dimmed); }
+.switchInput:checked + .switchTrack {
+  border-color: var(--dsw-alias-button-primary-fill);
+  background: var(--dsw-alias-button-primary-fill);
+}
+.switchInput:checked + .switchTrack .switchThumb {
+  transform: translateX(16px);
+  background: var(--dsw-alias-bg-layer-3);
+}
+.switchInput:focus-visible + .switchTrack {
+  outline: 2px solid var(--dsw-alias-state-business-primary);
+  outline-offset: 2px;
+}
+
+.connectionToolbar button,
+.statusOverlay button {
+  min-height: 27px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  border-radius: 6px;
+  background: var(--dsw-alias-bg-layer-2);
+  color: var(--dsw-alias-label-primary);
+  padding: 3px 8px;
+  cursor: pointer;
+}
+
+.connectionToolbar button:hover,
+.statusOverlay button:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+
+.connectionDot {
+  width: 8px;
+  height: 8px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--dsw-alias-label-tertiary);
+}
+
+/* The dot + label cluster the arm switch sits LEFT of. */
+.connectionStatus {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* ── The runtime arm switch (键盘鼠标远程控制) ── control is OFF until this
+   is explicitly checked, even with the plugin's interactive setting on.
+   Grayed + hairline-separated while the master setting is off. */
+.controlToggle {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding-right: 8px;
+  border-right: 1px solid var(--dsw-alias-border-l2);
+  font-size: 12px;
+  line-height: 18px;
+  color: var(--dsw-alias-label-secondary);
+  white-space: nowrap;
+  user-select: none;
+  cursor: pointer;
+}
+
+.controlToggle:hover { color: var(--dsw-alias-label-primary); }
+
+.controlToggle input {
+  flex: none;
+  width: 13px;
+  height: 13px;
+  margin: 0;
+  accent-color: var(--dsw-alias-button-primary-fill);
+  cursor: pointer;
+}
+
+.controlToggle input:focus-visible {
+  outline: 2px solid var(--dsw-alias-state-business-primary);
+  outline-offset: 2px;
+}
+
+.controlToggle[data-enabled='false'] {
+  color: var(--dsw-alias-label-dimmed);
+  cursor: default;
+}
+
+.controlToggle[data-enabled='false'] input {
+  cursor: default;
+  opacity: 0.45;
+}
+
+
+.connected { background: var(--dsw-alias-status-success); }
+.opening,
+.connecting,
+.reconnecting { background: var(--dsw-alias-status-warning); }
+.error { background: var(--dsw-alias-status-error); }
+.connectionLabel { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* ── Target tab strip ── mirrored after the better-sidebar tab bar
+   (.tab / .tabActive / .tabTitle / .tabClose), token-driven. */
+
+.targetTabs {
+  flex: none;
+  display: flex;
+  align-items: stretch;
+  gap: 2px;
+  overflow-x: auto;
+  padding: 3px 6px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+}
+
+.tab {
+  flex: none;
+  max-width: 180px;
+  min-width: 56px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 4px 0 10px;
+  font: var(--dsw-font-xxs-12, 12px system-ui);
+  font-size: 12px;
+  color: var(--dsw-alias-label-secondary);
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  user-select: none;
+  line-height: 26px;
+}
+
+.tab:hover { background: var(--dsw-alias-interactive-bg-hover); }
+.tabActive {
+  color: var(--dsw-alias-label-primary);
+  /* Native selected fill — no underline, no shadow (Rows .sessionRow.selected). */
+  background: var(--dsw-alias-interactive-bg-active);
+}
+
+.tabTitle {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Same shape as better-sidebar's .tabClose (18px square, radius 4). */
+.tabClose {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--dsw-alias-label-tertiary);
+  cursor: pointer;
+  flex: none;
+}
+
+.tabClose:hover:not(:disabled) {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+.tabClose:disabled { opacity: 0.4; cursor: default; }
+
+.newTabButton {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  align-self: center;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+}
+
+.newTabButton:hover:not(:disabled) {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+.newTabButton:disabled { opacity: 0.4; cursor: default; }
+
+.emptyTabs {
+  padding: 5px 8px;
+  color: var(--dsw-alias-label-tertiary);
+  font-size: 12px;
+  line-height: 26px;
+  white-space: nowrap;
+}
+
+/* ── Navigation bar ── mirrored after the built-in sidebar browser
+   (.browserBar / .iconButton / .browserInput), same tokens and metrics. */
+
+.browserBar {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--dsw-alias-border-l1);
+}
+
+.iconButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--dsw-alias-label-secondary);
+  cursor: pointer;
+  flex: none;
+}
+
+.iconButton:hover:not(:disabled) {
+  background: var(--dsw-alias-interactive-bg-hover);
+  color: var(--dsw-alias-label-primary);
+}
+
+.iconButton:disabled { opacity: 0.4; cursor: default; }
+
+.browserInput {
+  flex: 1;
+  min-width: 0;
+  height: 28px;
+  padding: 0 10px;
+  border: 1px solid var(--dsw-alias-border-l1);
+  border-radius: 6px;
+  background: var(--dsw-alias-bg-layer-1);
+  color: var(--dsw-alias-label-primary);
+  font: var(--dsw-font-xxs-12, 12px system-ui);
+  font-size: 12px;
+}
+
+.browserInput:focus {
+  outline: none;
+  border-color: var(--dsw-alias-border-l2);
+}
+
+.browserInput:disabled { opacity: 0.45; cursor: default; }
+
+.viewport {
+  position: relative;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  background: var(--dsw-alias-bg-base);
+}
+.canvasWrap { position: relative; width: 100%; height: 100%; }
+.liveCanvas { width: 100%; height: 100%; display: block; outline: none; touch-action: none; }
+.liveCanvas:focus-visible { outline: 2px solid var(--dsw-alias-border-focus); outline-offset: -2px; }
+
+/* The keyboard/IME sink: invisible, click-through (focus is programmatic on
+   view click), and it must never scroll or show a caret. */
+.keySink {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  border: 0;
+  margin: 0;
+  opacity: 0;
+  resize: none;
+  overflow: hidden;
+  pointer-events: none;
+  caret-color: transparent;
+  background: transparent;
+}
+
+.typeHint {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 11px;
+  color: var(--dsw-alias-label-secondary);
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 78%, transparent);
+  border: 1px solid var(--dsw-alias-border-l2);
+  pointer-events: none;
+}
+
+.statusOverlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 24px;
+  text-align: center;
+  color: var(--dsw-alias-label-secondary);
+  background: color-mix(in srgb, var(--dsw-alias-bg-layer-1) 82%, transparent);
+}
+
+@media (max-width: 520px) {
+  .topRow { align-items: stretch; flex-direction: column; padding: 5px 7px; }
+  .browserBar { flex-wrap: wrap; }
+  .browserInput { order: 2; flex-basis: 100%; }
+  .settingsPanel { min-width: 0; }
+  .settingRow { align-items: stretch; flex-direction: column; }
+  .settingControl { justify-content: flex-start; }
+}
