@@ -438,6 +438,9 @@
 .statusOverlay {
   position: absolute;
   inset: 0;
+  /* Click-through: a transient status message must never swallow canvas input.
+     Without this the page looks fine but every click and wheel dies here. */
+  pointer-events: none;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -457,3 +460,6 @@
   .settingRow { align-items: stretch; flex-direction: column; }
   .settingControl { justify-content: flex-start; }
 }
+
+/* The overlay is click-through, but its Retry button must stay reachable. */
+.statusOverlay button { pointer-events: auto; }
