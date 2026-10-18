@@ -6,7 +6,15 @@ import { createHttpHandlers, createTicketRegistry, HTTP_ROUTES, type HttpRequest
 import { createCdpWebSocketRoute, WEBSOCKET_ROUTE, type CdpSession, type UpgradeRequest, type UpgradeSocket } from './routes/websocket.ts'
 
 export const name = 'dsh-sidebar-cdp-browser'
-export const inject = ['webServer', 'sessions', 'webRuntime']
+/**
+ * `webRuntime` is gone in DSH 0.2.x (zero references in 0.2.1-rc.2); naming a
+ * missing service in `inject` keeps the whole plugin from mounting. Its only
+ * use was `trustedHosts`, which the localhost deployment does not need.
+ */
+export const inject = ['webServer', 'sessions']
+
+/** Non-loopback authorities this deployment serves; empty = loopback only. */
+const TRUSTED_HOSTS: readonly string[] = []
 export { Config }
 
 /** The better-sidebar tab descriptor id whose pluginSettings blob holds the UI endpoint. */
@@ -21,7 +29,6 @@ export interface CdpLiveHostContext {
     registerUpgrade(route: { path: string; handler: (req: UpgradeRequest, socket: UpgradeSocket, head: Uint8Array) => void }): () => void
   }
   sessions: { get(id: string): unknown }
-  webRuntime: { trustedHosts: readonly string[] }
   effect(fn: () => void | (() => void), label?: string): void
   /**
    * Deferred service injection (cordis `ctx.inject`): the body mounts once the
@@ -68,8 +75,8 @@ export function apply(ctx: CdpLiveHostContext, rawConfig?: CdpLiveConfig): void 
     tickets,
     hasSession: sessionId => ctx.sessions.get(sessionId) !== undefined,
     frameConfig: (): FrameFieldValues => resolveFrameValues(config, readUiFrameOverrides()),
-  }, ctx.webRuntime.trustedHosts)
-  const ws = createCdpWebSocketRoute(tickets, loggingSession, ctx.webRuntime.trustedHosts)
+  }, TRUSTED_HOSTS)
+  const ws = createCdpWebSocketRoute(tickets, loggingSession, TRUSTED_HOSTS)
 
   ctx.inject?.(['settings'], (face) => {
     readUiSettings = (): Record<string, unknown> => {
