@@ -114,7 +114,19 @@ export class CdpLiveSession implements LiveCdpSession {
       if (selected === key && framePump !== undefined) return
       await stopSelected()
       registry.resolve(key)
-      leases.acquire(key, owner, 60_000)
+      try {
+        leases.acquire(key, owner, 60_000)
+      } catch (error) {
+        // Toggling the control gate tears this view's socket down and opens a new
+        // one with a fresh owner id. The old socket's close handler releases its
+        // lease, but it can lose that race, and then the new view is refused with
+        // "Target lease is held by another owner" even though nobody else wants
+        // the target. Reclaim it: this session is the only consumer of its own
+        // targets, so a conflicting lease here is always a stale one.
+        if (!/held by another owner/i.test(error instanceof Error ? error.message : String(error))) throw error
+        leases.revokeTarget(key)
+        leases.acquire(key, owner, 60_000)
+      }
       selected = key
       try {
         // Resolved per start (not per plugin load): the UI frame overrides are
