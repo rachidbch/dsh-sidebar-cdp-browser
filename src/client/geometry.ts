@@ -20,6 +20,21 @@ export function containRect(container: Size, content: Size): DrawRect {
   return { x: (container.width - width) / 2, y: (container.height - height) / 2, width, height, scale }
 }
 
+
+/**
+ * Fit the page to the pane WIDTH and let it overflow vertically, instead of
+ * `contain` (min of both ratios) which letterboxes and wastes the wide axis.
+ * A pane wider than the page ratio therefore shows the full width at 1:1-ish
+ * scale, scrolled rather than shrunk.
+ */
+export function coverWidthRect(container: Size, content: Size): DrawRect {
+  if (container.width <= 0 || container.height <= 0 || content.width <= 0 || content.height <= 0) {
+    return { x: 0, y: 0, width: 0, height: 0, scale: 1 }
+  }
+  const scale = container.width / content.width
+  return { x: 0, y: 0, width: content.width * scale, height: content.height * scale, scale }
+}
+
 export function clientToFrame(client: Point, bounds: DOMRect, draw: DrawRect, frame: Size): Point | null {
   const x = client.x - bounds.left - draw.x
   const y = client.y - bounds.top - draw.y

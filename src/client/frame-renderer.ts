@@ -1,5 +1,5 @@
 import type { FrameMetadata } from './cdp-api.ts'
-import { containRect, frameSize, type DrawRect, type Size } from './geometry.ts'
+import { coverWidthRect, frameSize, type DrawRect, type Size } from './geometry.ts'
 
 export interface RenderedFrame {
   targetKey: string
@@ -32,7 +32,16 @@ export function createFrameRenderer(): FrameRenderer {
       const context = canvas.getContext('2d', { alpha: false })
       if (!context) return null
       const ratio = window.devicePixelRatio || 1
-      const cssSize: Size = { width: canvas.clientWidth, height: canvas.clientHeight }
+      const paneWidth = canvas.clientWidth
+      const content = frameSize(frame.metadata, { width: next.width, height: next.height })
+      // Fit the WIDTH of the pane. `contain` (min of both ratios) letterboxed a
+      // page inside a wide pane, which read as wasted space in fullscreen; a
+      // wider pane now means a larger page. The canvas then grows taller than the
+      // pane, and the page's own scrolling moves content through the visible part,
+      // so nothing becomes unreachable.
+      const draw = coverWidthRect({ width: paneWidth, height: canvas.clientHeight }, content)
+      const cssSize: Size = { width: draw.width, height: draw.height }
+      if (Math.abs(canvas.clientHeight - draw.height) > 1) canvas.style.height = `${draw.height}px`
       const wantedWidth = Math.max(1, Math.round(cssSize.width * ratio))
       const wantedHeight = Math.max(1, Math.round(cssSize.height * ratio))
       if (canvas.width !== wantedWidth || canvas.height !== wantedHeight) {
@@ -42,8 +51,6 @@ export function createFrameRenderer(): FrameRenderer {
       context.setTransform(ratio, 0, 0, ratio, 0, 0)
       context.fillStyle = getComputedStyle(canvas).getPropertyValue('--dsw-alias-bg-base').trim() || 'rgb(0 0 0)'
       context.fillRect(0, 0, cssSize.width, cssSize.height)
-      const content = frameSize(frame.metadata, { width: next.width, height: next.height })
-      const draw = containRect(cssSize, content)
       context.imageSmoothingEnabled = true
       context.imageSmoothingQuality = 'high'
       context.drawImage(next, draw.x, draw.y, draw.width, draw.height)

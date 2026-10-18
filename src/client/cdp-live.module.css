@@ -398,8 +398,9 @@
   overflow: hidden;
   background: var(--dsw-alias-bg-base);
 }
-.canvasWrap { position: relative; width: 100%; height: 100%; }
-.liveCanvas { width: 100%; height: 100%; display: block; outline: none; touch-action: none; }
+.canvasWrap { position: relative; width: 100%; height: 100%; overflow: hidden; }
+/* 100% here, overridden to the scaled page height by the renderer. */
+.liveCanvas { width: 100%; height: 100%; display: block; outline: none; touch-action: none; overflow: hidden; }
 .liveCanvas:focus-visible { outline: 2px solid var(--dsw-alias-border-focus); outline-offset: -2px; }
 
 /* The keyboard/IME sink: invisible, click-through (focus is programmatic on
