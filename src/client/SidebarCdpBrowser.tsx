@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import type { TabComponentProps } from 'dsh-better-sidebar/client/service'
 import { requestId, DEFAULT_ENDPOINT_DISPLAY, type KeyInput, type MouseInput, type ServerMessage } from './cdp-api.ts'
 import type { RenderedFrame } from './frame-renderer.ts'
@@ -59,6 +59,23 @@ export function SidebarCdpBrowser(props: TabComponentProps) {
   })
 
   useEffect(() => { setFrame(undefined) }, [settings.endpoint, targets.selectedKey])
+
+  // The screencast survives a same-tab navigation, but a panel that stopped
+  // repainting kept showing the previous page until it was closed and reopened.
+  // When the shown target's URL changes, drop the stale bitmap and re-issue
+  // `screencast.start` (idempotent per target on the host) so frames flow again.
+  const shownUrl = targets.selected?.url
+  const lastShownUrl = useRef<string | undefined>(undefined)
+  useEffect(() => {
+    if (shownUrl === undefined || shownUrl === lastShownUrl.current) return
+    const first = lastShownUrl.current === undefined
+    lastShownUrl.current = shownUrl
+    if (first) return
+    setFrame(undefined)
+    if (targets.selectedKey !== undefined) {
+      socket.send({ v: 1, type: 'screencast.start', requestId: requestId(), targetKey: targets.selectedKey })
+    }
+  }, [shownUrl, targets.selectedKey, socket.send])
 
   const navigate = useCallback((url: string) => {
     if (targets.selectedKey === undefined) return
