@@ -79,6 +79,13 @@ const RuntimeConfigSchema = z.object({
   ...frameSchemas(spec => z.number().int().min(spec.min).max(spec.max).default(spec.def)),
   bufferedAmountSoftLimit: z.number().int().min(64 * 1024).max(16 * 1024 * 1024).default(512 * 1024),
   bufferedAmountHardLimit: z.number().int().min(256 * 1024).max(64 * 1024 * 1024).default(4 * 1024 * 1024),
+  /**
+   * Extra authorities accepted by the trust fence besides loopback, e.g.
+   * `dsh.example.ts.net`. Needed whenever the human reaches DSH through a
+   * reverse proxy or a tailnet name: the request Host is then not loopback and
+   * every `/api` call, including the live-view ticket, is otherwise refused.
+   */
+  trustedHosts: z.array(z.string()).default([]),
 }).strict()
 
 /** DSH Loader configuration schema (runtime tuning only — the endpoint is a UI setting). */

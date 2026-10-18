@@ -14,6 +14,11 @@ export const name = 'dsh-sidebar-cdp-browser'
 export const inject = ['webServer', 'sessions']
 
 /** Non-loopback authorities this deployment serves; empty = loopback only. */
+/**
+ * Trusted authorities come from the plugin config (`trustedHosts`), never from
+ * a hardcoded list: reaching DSH through a tailnet name or reverse proxy makes
+ * the request Host non-loopback, and the fence would refuse every ticket.
+ */
 const TRUSTED_HOSTS: readonly string[] = []
 export { Config }
 
@@ -75,8 +80,8 @@ export function apply(ctx: CdpLiveHostContext, rawConfig?: CdpLiveConfig): void 
     tickets,
     hasSession: sessionId => ctx.sessions.get(sessionId) !== undefined,
     frameConfig: (): FrameFieldValues => resolveFrameValues(config, readUiFrameOverrides()),
-  }, TRUSTED_HOSTS)
-  const ws = createCdpWebSocketRoute(tickets, loggingSession, TRUSTED_HOSTS)
+  }, config.trustedHosts)
+  const ws = createCdpWebSocketRoute(tickets, loggingSession, config.trustedHosts)
 
   ctx.inject?.(['settings'], (face) => {
     readUiSettings = (): Record<string, unknown> => {
