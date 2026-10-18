@@ -30,6 +30,22 @@ export function clientToFrame(client: Point, bounds: DOMRect, draw: DrawRect, fr
   }
 }
 
+/**
+ * Same mapping as {@link clientToFrame}, but clamps a pointer that sits on the
+ * letterbox bars instead of returning null. A wheel gesture over the black band
+ * beside a `contain`-fitted page still belongs to that page: dropping it made
+ * scrolling look broken whenever the pane was wider than the page ratio.
+ */
+export function clientToFrameClamped(client: Point, bounds: DOMRect, draw: DrawRect, frame: Size): Point | null {
+  if (draw.width === 0 || draw.height === 0) return null
+  const x = clamp(client.x - bounds.left - draw.x, 0, draw.width)
+  const y = clamp(client.y - bounds.top - draw.y, 0, draw.height)
+  return {
+    x: clamp(x / draw.width * frame.width, 0, frame.width),
+    y: clamp(y / draw.height * frame.height, 0, frame.height),
+  }
+}
+
 function positive(value: unknown): number | undefined {
   return typeof value === 'number' && Number.isFinite(value) && value > 0 ? value : undefined
 }

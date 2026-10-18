@@ -1,5 +1,5 @@
 import type { KeyInput, MouseInput } from './cdp-api.ts'
-import { clientToFrame, type DrawRect, type Size } from './geometry.ts'
+import { clientToFrame, clientToFrameClamped, type DrawRect, type Size } from './geometry.ts'
 
 export interface InputBridgeOptions {
   canvas: HTMLCanvasElement
@@ -44,11 +44,19 @@ export function attachInputBridge(options: InputBridgeOptions): () => void {
     if (p !== null) emit({ type: 'mouseReleased', ...p, button: cancelled ? 'none' : buttonOf(event.button), buttons, clickCount: event.detail || 1, modifiers: modifiersOf(event) })
   }
   const wheel = (event: WheelEvent) => {
-    const p = point(event)
+    // A wheel over the letterbox still targets the page, so clamp instead of
+    // dropping it; dropping made scrolling look dead whenever the pane ratio
+    // did not match the page ratio.
+    const draw = options.drawRect()
+    const p = draw
+      ? clientToFrameClamped({ x: event.clientX, y: event.clientY }, canvas.getBoundingClientRect(), draw, options.frameSize())
+      : null
     if (p === null) return
     event.preventDefault()
     const factor = event.deltaMode === WheelEvent.DOM_DELTA_LINE ? 16 : event.deltaMode === WheelEvent.DOM_DELTA_PAGE ? options.frameSize().height : 1
-    emit({ type: 'mouseWheel', ...p, button: 'none', buttons, deltaX: event.deltaX * factor, deltaY: event.deltaY * factor, modifiers: modifiersOf(event) })
+    // Trackpads report small deltas in pixels; CDP wants whole pixels.
+    const scale = event.deltaMode === 0 && Math.abs(event.deltaY) > 0 && Math.abs(event.deltaY) < 1 ? 1 : 1
+    emit({ type: 'mouseWheel', ...p, button: 'none', buttons, deltaX: Math.round(event.deltaX * factor * scale), deltaY: Math.round(event.deltaY * factor * scale), modifiers: modifiersOf(event) })
   }
   const context = (event: MouseEvent) => event.preventDefault()
   const cancel = (event: PointerEvent) => release(event, true)
@@ -57,6 +65,9 @@ export function attachInputBridge(options: InputBridgeOptions): () => void {
   canvas.addEventListener('pointerup', release)
   canvas.addEventListener('pointercancel', cancel)
   canvas.addEventListener('wheel', wheel, { passive: false })
+  // Some hosts scroll the pane instead of the canvas; capture so the wheel
+  // reaches the page even when an overlay sits above the canvas.
+  window.addEventListener('wheel', wheel, { passive: false, capture: true })
   canvas.addEventListener('contextmenu', context)
   return () => {
     if (moveFrame !== undefined) window.cancelAnimationFrame(moveFrame)
@@ -65,6 +76,7 @@ export function attachInputBridge(options: InputBridgeOptions): () => void {
     canvas.removeEventListener('pointerup', release)
     canvas.removeEventListener('pointercancel', cancel)
     canvas.removeEventListener('wheel', wheel)
+    window.removeEventListener('wheel', wheel, { capture: true } as EventListenerOptions)
     canvas.removeEventListener('contextmenu', context)
   }
 }
