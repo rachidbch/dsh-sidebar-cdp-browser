@@ -98,7 +98,19 @@ export class CdpLiveSession implements LiveCdpSession {
       framePump = undefined
     }
 
-    const startTarget = async (key: TargetKey): Promise<void> => {
+    /**
+     * Serialise target switches. `stopSelected()` detaches the previous
+     * target; if a second `screencast.start` overlaps the first, that detach
+     * lands while `Page.enable` is still awaiting its reply, and Chrome
+     * reports "Target closed". One switch at a time, always.
+     */
+    let switching: Promise<void> = Promise.resolve()
+    const startTarget = (key: TargetKey): Promise<void> => {
+      const next = switching.then(() => startTargetNow(key))
+      switching = next.catch(() => undefined)
+      return next
+    }
+    const startTargetNow = async (key: TargetKey): Promise<void> => {
       if (selected === key && framePump !== undefined) return
       await stopSelected()
       registry.resolve(key)

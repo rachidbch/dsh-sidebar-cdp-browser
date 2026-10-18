@@ -54,7 +54,10 @@ export interface LiveViewSettings {
 export function readSettings(value: Record<string, unknown> | undefined): LiveViewSettings {
   return {
     endpoint: typeof value?.endpoint === 'string' ? value.endpoint : '',
-    interactive: value?.interactive === true,
+    // Default ON: the master switch only makes the per-view checkbox usable;
+    // the checkbox itself still starts unchecked, so nothing is driven by
+    // accident. Default-off made the feature undiscoverable.
+    interactive: value?.interactive !== false,
     frame: readFrameOverrides(value),
   }
 }

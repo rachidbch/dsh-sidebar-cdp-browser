@@ -30,6 +30,8 @@ export function SidebarCdpBrowser(props: TabComponentProps) {
   // The session mode — and with it the host-side requireInteractive() gate —
   // only turns interactive when BOTH are on; toggling either reconnects with
   // the new mode (the same proven flow an endpoint change uses).
+  // Master switch defaults ON so the per-view checkbox is reachable; the
+  // checkbox itself still starts unchecked, so a fresh view stays view-only.
   const interactiveAllowed = settings.interactive
   const [armedInput, setArmedInput] = useState(false)
   const armed = interactiveAllowed && armedInput
